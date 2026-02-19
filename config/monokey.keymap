@@ -45,31 +45,27 @@
         lang2_4: lang2_4 {
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
-            bindings =
-                <&macro_press>,
-                <&kp LANG2>,
-                <&macro_wait_time 30>,
-                <&macro_tap>,
-                <&kp NUMBER_4>,
-                <&macro_wait_time 30>,
-                <&macro_release>,
-                <&kp LANG2>;
+            wait-ms = <30>;
+            tap-ms = <30>;
+            bindings
+                = <&macro_press &kp LANG2>
+                , <&macro_pause_for_release>
+                , <&macro_tap &kp N4>
+                , <&macro_release &kp LANG2>
+                ;
         };
 
         lang2_5: lang2_5 {
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
-            bindings =
-                <&macro_press>,
-                <&kp LANGUAGE_2>,
-                <&macro_wait_time 30>,
-                <&macro_tap>,
-                <&kp NUMBER_5>,
-                <&macro_wait_time 30>,
-                <&macro_release>,
-                <&kp LANGUAGE_2>;
-
-            label = "LANG2_5";
+            wait-ms = <30>;
+            tap-ms = <30>;
+            bindings
+                = <&macro_press &kp LANG2>
+                , <&macro_pause_for_release>
+                , <&macro_tap &kp N5>
+                , <&macro_release &kp LANG2>
+                ;
         };
     };
 
