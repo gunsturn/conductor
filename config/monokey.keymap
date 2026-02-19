@@ -47,14 +47,7 @@
             #binding-cells = <0>;
             wait-ms = <30>;
             tap-ms = <30>;
-            bindings =
-                <&macro_wait_time 100>,
-                <&macro_press>,
-                <&kp LANGUAGE_2>,
-                <&macro_tap>,
-                <&kp N4>,
-                <&macro_release>,
-                <&kp LANGUAGE_2>;
+            bindings = <&kp LANGUAGE_2 &kp NUMBER_4>;
         };
 
         lang2_5: lang2_5 {
