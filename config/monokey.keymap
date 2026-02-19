@@ -50,7 +50,6 @@
             bindings =
                 <&macro_press>,
                 <&kp LANGUAGE_2>,
-                <&macro_wait_time 50>,
                 <&macro_tap>,
                 <&kp N4>,
                 <&macro_release>,
@@ -65,7 +64,6 @@
             bindings =
                 <&macro_press>,
                 <&kp LANG2>,
-                <&macro_wait_time 50>,
                 <&macro_tap>,
                 <&kp N5>,
                 <&macro_release>,
