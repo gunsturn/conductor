@@ -41,6 +41,18 @@
         };
     };
 
+    macros {
+        lang2_4: lang2_4 {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings
+                = <&macro_press &kp LANG2>
+                , <&macro_tap &kp N4>
+                , <&macro_release &kp LANG2>
+                ;
+        };
+    };
+
     keymap {
         compatible = "zmk,keymap";
 
