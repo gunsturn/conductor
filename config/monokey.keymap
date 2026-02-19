@@ -49,12 +49,12 @@
             tap-ms = <30>;
             bindings =
                 <&macro_press>,
-                <&kp LANG2>,
+                <&kp LANG1>,
                 <&macro_wait_time 50>,
                 <&macro_tap>,
                 <&kp N4>,
                 <&macro_release>,
-                <&kp LANG2>;
+                <&kp LANGUAGE_1>;
         };
 
         lang2_5: lang2_5 {
