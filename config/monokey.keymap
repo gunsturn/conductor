@@ -49,7 +49,7 @@
                 <&macro_press>,
                 <&kp LANG2>,
                 <&macro_tap>,
-                <&kp KP_NUMBER_4>,
+                <&kp NUMBER_4>,
                 <&macro_release>,
                 <&kp LANG2>;
         };
@@ -61,7 +61,7 @@
                 <&macro_press>,
                 <&kp LANGUAGE_2>,
                 <&macro_tap>,
-                <&kp KP_NUMBER_5>,
+                <&kp NUMBER_5>,
                 <&macro_release>,
                 <&kp LANGUAGE_2>;
 
