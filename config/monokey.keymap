@@ -53,6 +53,20 @@
                 <&macro_release>,
                 <&kp LANG2>;
         };
+
+        lang2_5: lang2_5 {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings =
+                <&macro_press>,
+                <&kp LANGUAGE_2>,
+                <&macro_tap>,
+                <&kp NUMBER_5>,
+                <&macro_release>,
+                <&kp LANGUAGE_2>;
+
+            label = "LANG2_5";
+        };
     };
 
     keymap {
@@ -89,10 +103,10 @@
 
         ARROW {
             bindings = <
-&trans  &trans  &trans  &trans    &trans                                &trans  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &lang2_4  &kp LS(LC(NUMBER_6))                  &trans  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans    &trans                                &trans  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans    &trans                &trans  &trans  &trans                  &trans  &trans
+&trans  &trans  &trans  &trans    &trans                    &trans  &trans  &trans  &trans  &trans
+&trans  &trans  &trans  &lang2_4  &lang2_5                  &trans  &trans  &trans  &trans  &trans
+&trans  &trans  &trans  &trans    &trans                    &trans  &trans  &trans  &trans  &trans
+&trans  &trans  &trans  &trans    &trans    &trans  &trans  &trans                  &trans  &trans
             >;
 
             sensor-bindings = <&inc_dec_kp LC(PAGE_UP) LC(PAGE_DOWN)>;
