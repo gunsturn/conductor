@@ -48,6 +48,7 @@
             wait-ms = <30>;
             tap-ms = <30>;
             bindings =
+                <&macro_wait_time 30>,
                 <&macro_press>,
                 <&kp LANGUAGE_2>,
                 <&macro_tap>,
@@ -62,6 +63,7 @@
             wait-ms = <30>;
             tap-ms = <30>;
             bindings =
+                <&macro_wait_time 30>,
                 <&macro_press>,
                 <&kp LANG2>,
                 <&macro_tap>,
