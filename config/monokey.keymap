@@ -51,6 +51,7 @@
                 <&macro_wait_time 30>,
                 <&macro_tap>,
                 <&kp NUMBER_4>,
+                <&macro_wait_time 30>,
                 <&macro_release>,
                 <&kp LANG2>;
         };
@@ -64,6 +65,7 @@
                 <&macro_wait_time 30>,
                 <&macro_tap>,
                 <&kp NUMBER_5>,
+                <&macro_wait_time 30>,
                 <&macro_release>,
                 <&kp LANGUAGE_2>;
 
