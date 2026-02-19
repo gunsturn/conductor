@@ -48,7 +48,7 @@
             wait-ms = <30>;
             tap-ms = <30>;
             bindings =
-                <&macro_wait_time 30>,
+                <&macro_wait_time 100>,
                 <&macro_press>,
                 <&kp LANGUAGE_2>,
                 <&macro_tap>,
@@ -63,7 +63,7 @@
             wait-ms = <30>;
             tap-ms = <30>;
             bindings =
-                <&macro_wait_time 30>,
+                <&macro_wait_time 100>,
                 <&macro_press>,
                 <&kp LANG2>,
                 <&macro_tap>,
@@ -107,10 +107,10 @@
 
         ARROW {
             bindings = <
-&kp LEFT_BRACE  &trans  &trans  &trans            &trans                             &trans         &trans  &trans  &trans  &trans
-&trans          &trans  &trans  &kp LEFT_BRACKET  &kp RIGHT_BRACKET                  &trans         &trans  &trans  &trans  &trans
-&trans          &trans  &trans  &trans            &trans                             &trans         &trans  &trans  &trans  &trans
-&trans          &trans  &trans  &trans            &trans             &trans  &trans  &kp LA(SPACE)                  &trans  &trans
+&kp LEFT_BRACE  &trans  &trans  &trans    &trans                    &trans         &trans  &trans  &trans  &trans
+&trans          &trans  &trans  &lang2_4  &lang2_5                  &trans         &trans  &trans  &trans  &trans
+&trans          &trans  &trans  &trans    &trans                    &trans         &trans  &trans  &trans  &trans
+&trans          &trans  &trans  &trans    &trans    &trans  &trans  &kp LA(SPACE)                  &trans  &trans
             >;
 
             sensor-bindings = <&inc_dec_kp LC(PAGE_UP) LC(PAGE_DOWN)>;
