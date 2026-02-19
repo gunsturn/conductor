@@ -50,7 +50,7 @@
             bindings =
                 <&macro_press>,
                 <&kp LANG2>,
-                <&macro_pause_for_release>,
+                <&macro_wait_time 50>,
                 <&macro_tap>,
                 <&kp N4>,
                 <&macro_release>,
@@ -65,7 +65,7 @@
             bindings =
                 <&macro_press>,
                 <&kp LANG2>,
-                <&macro_pause_for_release>,
+                <&macro_wait_time 50>,
                 <&macro_tap>,
                 <&kp N5>,
                 <&macro_release>,
@@ -107,10 +107,10 @@
 
         ARROW {
             bindings = <
-&trans  &trans  &trans  &trans        &trans                        &trans  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &kp NUMBER_4  &kp NUMBER_5                  &trans  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans        &trans                        &trans  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans        &trans        &trans  &trans  &trans                  &trans  &trans
+&trans  &trans  &trans  &trans    &trans                    &trans  &trans  &trans  &trans  &trans
+&trans  &trans  &trans  &lang2_4  &lang2_5                  &trans  &trans  &trans  &trans  &trans
+&trans  &trans  &trans  &trans    &trans                    &trans  &trans  &trans  &trans  &trans
+&trans  &trans  &trans  &trans    &trans    &trans  &trans  &trans                  &trans  &trans
             >;
 
             sensor-bindings = <&inc_dec_kp LC(PAGE_UP) LC(PAGE_DOWN)>;
