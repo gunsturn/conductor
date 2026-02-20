@@ -87,10 +87,10 @@
 
         FUNCTION {
             bindings = <
-&kp LS(NUMBER_2)  &trans  &trans  &kp C_BRI_INC  &kp C_VOL_UP                  &trans  &trans  &trans  &trans           &trans
-&kp ESC           &trans  &trans  &kp C_BRI_DEC  &kp C_VOL_DN                  &trans  &trans  &trans  &kp LEFT_BRACE   &kp LEFT_BRACKET
-&trans            &trans  &trans  &trans         &kp C_MUTE                    &trans  &trans  &trans  &kp RIGHT_BRACE  &kp RIGHT_BRACKET
-&trans            &trans  &trans  &trans         &mo 6         &trans  &trans  &trans                  &trans           &trans
+&kp LS(NUMBER_2)  &trans  &trans  &kp C_BRI_INC  &kp C_VOL_UP                  &trans  &trans  &trans                 &kp SINGLE_QUOTE  &kp DOUBLE_QUOTES
+&kp ESC           &trans  &trans  &kp C_BRI_DEC  &kp C_VOL_DN                  &trans  &trans  &kp LEFT_PARENTHESIS   &kp LEFT_BRACE    &kp LEFT_BRACKET
+&trans            &trans  &trans  &trans         &kp C_MUTE                    &trans  &trans  &kp RIGHT_PARENTHESIS  &kp RIGHT_BRACE   &kp RIGHT_BRACKET
+&trans            &trans  &trans  &trans         &mo 6         &trans  &trans  &trans                                 &trans            &trans
             >;
         };
 
