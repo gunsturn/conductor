@@ -106,7 +106,7 @@
         ARROW {
             bindings = <
 &kp P   &trans  &trans  &trans  &trans                  &trans         &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans  &trans                  &trans         &trans  &trans  &trans  &trans
+&trans  &trans  &trans  &trans  &trans                  &trans         &trans  &trans  &trans  &kp DELETE
 &trans  &trans  &trans  &trans  &trans                  &trans         &trans  &trans  &trans  &trans
 &trans  &trans  &trans  &trans  &trans  &trans  &trans  &kp LA(SPACE)                  &trans  &trans
             >;
