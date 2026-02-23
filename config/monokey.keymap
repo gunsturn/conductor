@@ -48,9 +48,14 @@
             key-positions = <7 8>;
         };
 
-        zenhan {
-            bindings = <&kp LANG_ZENKAKUHANKAKU>;
+        lang1 {
+            bindings = <&kp LANGUAGE_1>;
             key-positions = <36 37>;
+        };
+
+        lang2 {
+            bindings = <&kp LANGUAGE_2>;
+            key-positions = <35 34>;
         };
     };
 
