@@ -19,7 +19,7 @@
         compatible = "zmk,combos";
 
         scroll {
-            bindings = <&mo 5>;
+            bindings = <&mo 6>;
             key-positions = <17 18>;
         };
 
@@ -39,7 +39,7 @@
         };
 
         changewin {
-            bindings = <&to 7>;
+            bindings = <&to 1>;
             key-positions = <6 8>;
         };
 
@@ -94,7 +94,18 @@
 &kp Q             &kp W         &kp E             &kp R            &kp T                                   &kp Y           &kp U  &kp I      &kp O       &kp P
 &kp A             &kp S         &kp D             &kp F            &kp G                                   &kp H           &kp J  &kp K      &kp L       &kp SEMICOLON
 &kp Z             &kp X         &kp C             &kp V            &kp B                                   &kp N           &kp M  &kp COMMA  &kp PERIOD  &kp SLASH
-&kp LEFT_CONTROL  &kp LEFT_ALT  &kp LEFT_COMMAND  &lt 3 BACKSPACE  &kp LANGUAGE_2  &lt 1 SPACE  &lt 2 TAB  &kp LANGUAGE_1                    &kp RCTRL   &kp RET
+&kp LEFT_CONTROL  &kp LEFT_ALT  &kp LEFT_COMMAND  &lt 4 BACKSPACE  &kp LANGUAGE_2  &lt 2 SPACE  &lt 3 TAB  &kp LANGUAGE_1                    &kp RCTRL   &kp RET
+            >;
+
+            sensor-bindings = <&inc_dec_kp PG_UP PAGE_DOWN>;
+        };
+
+        Windows {
+            bindings = <
+&kp Q         &kp W         &kp E             &kp R            &kp T                                     &kp Y           &kp U  &kp I      &kp O       &kp P
+&kp A         &kp S         &kp D             &kp F            &kp G                                     &kp H           &kp J  &kp K      &kp L       &kp SEMICOLON
+&kp Z         &kp X         &kp C             &kp V            &kp B                                     &kp N           &kp M  &kp COMMA  &kp PERIOD  &kp SLASH
+&kp LEFT_GUI  &kp LEFT_ALT  &kp LEFT_CONTROL  &lt 4 BACKSPACE  &kp INT_MUHENKAN  &lt 2 SPACE  &lt 3 TAB  &kp INT_HENKAN                    &kp RCTRL   &kp RET
             >;
 
             sensor-bindings = <&inc_dec_kp PG_UP PAGE_DOWN>;
@@ -105,7 +116,7 @@
 &kp LS(NUMBER_2)  &trans  &trans  &kp C_BRI_INC  &kp C_VOL_UP                  &trans                 &trans           &trans    &kp SINGLE_QUOTE  &kp DOUBLE_QUOTES
 &kp ESC           &trans  &trans  &kp C_BRI_DEC  &kp C_VOL_DN                  &kp LEFT_PARENTHESIS   &kp LEFT_BRACE   &mkp MB1  &mkp MB2          &kp LEFT_BRACKET
 &trans            &trans  &trans  &trans         &kp C_MUTE                    &kp RIGHT_PARENTHESIS  &kp RIGHT_BRACE  &trans    &trans            &kp RIGHT_BRACKET
-&trans            &trans  &trans  &trans         &mo 6         &trans  &trans  &trans                                            &trans            &trans
+&trans            &trans  &trans  &trans         &mo 7         &trans  &trans  &trans                                            &trans            &trans
             >;
         };
 
@@ -154,17 +165,6 @@
 &trans  &trans  &trans  &trans  &trans                  &trans         &trans         &trans         &trans         &trans
 &trans  &trans  &trans  &trans  &trans  &trans  &trans  &bootloader                                  &bt BT_CLR     &bt BT_CLR_ALL
             >;
-        };
-
-        Windows {
-            bindings = <
-&kp Q         &kp W         &kp E             &kp R            &kp T                                     &kp Y           &kp U  &kp I      &kp O       &kp P
-&kp A         &kp S         &kp D             &kp F            &kp G                                     &kp H           &kp J  &kp K      &kp L       &kp SEMICOLON
-&kp Z         &kp X         &kp C             &kp V            &kp B                                     &kp N           &kp M  &kp COMMA  &kp PERIOD  &kp SLASH
-&kp LEFT_GUI  &kp LEFT_ALT  &kp LEFT_CONTROL  &lt 3 BACKSPACE  &kp INT_MUHENKAN  &lt 1 SPACE  &lt 2 TAB  &kp INT_HENKAN                    &kp RCTRL   &kp RET
-            >;
-
-            sensor-bindings = <&inc_dec_kp PG_UP PAGE_DOWN>;
         };
 
         layer_8 {
