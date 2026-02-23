@@ -44,7 +44,7 @@
         };
 
         tomac {
-            bindings = <&to 1>;
+            bindings = <&to 0>;
             key-positions = <7 8>;
         };
     };
