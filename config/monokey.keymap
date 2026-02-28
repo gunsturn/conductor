@@ -141,7 +141,7 @@
 
         WIN_NUM {
             bindings = <
-&kp SLASH  &kp NUMBER_7  &kp NUMBER_8  &kp NUMBER_9  &kp STAR                   &kp PAGE_UP    &kp LG(LEFT)    &kp LG(HOME)    &kp LG(RIGHT)    &kp NUHS
+&kp SLASH  &kp NUMBER_7  &kp NUMBER_8  &kp NUMBER_9  &kp STAR                   &kp PAGE_UP    &kp LC(A)       &kp LG(HOME)    &kp LC(E)        &kp NUHS
 &kp MINUS  &kp NUMBER_4  &kp NUMBER_5  &kp NUMBER_6  &kp PLUS                   &kp PAGE_DOWN  &kp LA(LEFT)    &kp UP_ARROW    &kp LA(RIGHT)    &kp UNDERSCORE
 &trans     &kp NUMBER_1  &kp NUMBER_2  &kp NUMBER_3  &kp EQUAL                  &kp LC(A)      &kp LEFT_ARROW  &kp DOWN_ARROW  &kp RIGHT_ARROW  &kp LC(E)
 &trans     &kp NUMBER_0  &trans        &trans        &trans     &trans  &trans  &trans                                         &trans           &trans
