@@ -3,9 +3,9 @@
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/pointing.h>
 
-#define MOUSE 5
-#define SCROLL 6
-#define NUM 7
+#define MOUSE 6
+#define SCROLL 7
+#define NUM 8
 
 &mt {
     flavor = "balanced";
@@ -19,7 +19,7 @@
         compatible = "zmk,combos";
 
         scroll {
-            bindings = <&mo 6>;
+            bindings = <&mo 7>;
             key-positions = <17 18>;
         };
 
@@ -104,7 +104,7 @@
 &kp Q             &kp W         &kp E             &kp R            &kp T                                   &kp Y           &kp U  &kp I      &kp O       &kp P
 &kp A             &kp S         &kp D             &kp F            &kp G                                   &kp H           &kp J  &kp K      &kp L       &kp SEMICOLON
 &kp Z             &kp X         &kp C             &kp V            &kp B                                   &kp N           &kp M  &kp COMMA  &kp PERIOD  &kp SLASH
-&kp LEFT_CONTROL  &kp LEFT_ALT  &kp LEFT_COMMAND  &lt 4 BACKSPACE  &kp LANGUAGE_2  &lt 2 SPACE  &lt 3 TAB  &kp LANGUAGE_1                    &kp RCTRL   &kp RET
+&kp LEFT_CONTROL  &kp LEFT_ALT  &kp LEFT_COMMAND  &lt 5 BACKSPACE  &kp LANGUAGE_2  &lt 2 SPACE  &lt 3 TAB  &kp LANGUAGE_1                    &kp RCTRL   &kp RET
             >;
 
             sensor-bindings = <&inc_dec_kp PG_UP PAGE_DOWN>;
@@ -115,7 +115,7 @@
 &kp Q         &kp W         &kp E             &kp R            &kp T                                     &kp Y           &kp U  &kp I      &kp O       &kp P
 &kp A         &kp S         &kp D             &kp F            &kp G                                     &kp H           &kp J  &kp K      &kp L       &kp SEMICOLON
 &kp Z         &kp X         &kp C             &kp V            &kp B                                     &kp N           &kp M  &kp COMMA  &kp PERIOD  &kp SLASH
-&kp LEFT_GUI  &kp LEFT_ALT  &kp LEFT_CONTROL  &lt 4 BACKSPACE  &kp INT_MUHENKAN  &lt 2 SPACE  &lt 3 TAB  &kp INT_HENKAN                    &kp RCTRL   &kp RET
+&kp LEFT_GUI  &kp LEFT_ALT  &kp LEFT_CONTROL  &lt 5 BACKSPACE  &kp INT_MUHENKAN  &lt 2 SPACE  &lt 3 TAB  &kp INT_HENKAN                    &kp RCTRL   &kp RET
             >;
 
             sensor-bindings = <&inc_dec_kp PG_UP PAGE_DOWN>;
@@ -126,11 +126,20 @@
 &kp LS(NUMBER_2)  &trans  &trans  &kp C_BRI_INC  &kp C_VOL_UP                  &trans                 &trans           &trans    &kp SINGLE_QUOTE  &kp DOUBLE_QUOTES
 &kp ESC           &trans  &trans  &kp C_BRI_DEC  &kp C_VOL_DN                  &kp LEFT_PARENTHESIS   &kp LEFT_BRACE   &mkp MB1  &mkp MB2          &kp LEFT_BRACKET
 &trans            &trans  &trans  &trans         &kp C_MUTE                    &kp RIGHT_PARENTHESIS  &kp RIGHT_BRACE  &trans    &trans            &kp RIGHT_BRACKET
-&trans            &trans  &trans  &trans         &mo 7         &trans  &trans  &trans                                            &trans            &trans
+&trans            &trans  &trans  &trans         &mo 8         &trans  &trans  &trans                                            &trans            &trans
             >;
         };
 
         NUM {
+            bindings = <
+&kp SLASH  &kp NUMBER_7  &kp NUMBER_8  &kp NUMBER_9  &kp STAR                   &kp PAGE_UP    &kp LG(LEFT)    &kp LG(HOME)    &kp LG(RIGHT)    &kp NUHS
+&kp MINUS  &kp NUMBER_4  &kp NUMBER_5  &kp NUMBER_6  &kp PLUS                   &kp PAGE_DOWN  &kp LA(LEFT)    &kp UP_ARROW    &kp LA(RIGHT)    &kp UNDERSCORE
+&trans     &kp NUMBER_1  &kp NUMBER_2  &kp NUMBER_3  &kp EQUAL                  &kp LC(A)      &kp LEFT_ARROW  &kp DOWN_ARROW  &kp RIGHT_ARROW  &kp LC(E)
+&trans     &kp NUMBER_0  &trans        &trans        &trans     &trans  &trans  &trans                                         &trans           &trans
+            >;
+        };
+
+        WIN_NUM {
             bindings = <
 &kp SLASH  &kp NUMBER_7  &kp NUMBER_8  &kp NUMBER_9  &kp STAR                   &kp PAGE_UP    &kp LG(LEFT)    &kp LG(HOME)    &kp LG(RIGHT)    &kp NUHS
 &kp MINUS  &kp NUMBER_4  &kp NUMBER_5  &kp NUMBER_6  &kp PLUS                   &kp PAGE_DOWN  &kp LA(LEFT)    &kp UP_ARROW    &kp LA(RIGHT)    &kp UNDERSCORE
