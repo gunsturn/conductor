@@ -39,12 +39,14 @@
         };
 
         changewin {
-            bindings = <&to 1>;
+            timeout-ms = <50>;
+            bindings = <&os_switch_hold 1 0>;
             key-positions = <6 8>;
         };
 
         tomac {
-            bindings = <&to 0>;
+            timeout-ms = <50>;
+            bindings = <&os_switch_hold 0 0>;
             key-positions = <7 8>;
         };
 
@@ -65,6 +67,17 @@
     };
 
     behaviors {
+        // Cancel on the first combo-key release; other keys must not force a hold.
+        // A short combo is consumed without emitting text or changing layers.
+        os_switch_hold: os_switch_hold {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "tap-preferred";
+            tapping-term-ms = <500>;
+            quick-tap-ms = <0>;
+            bindings = <&to>, <&none>;
+        };
+
         right_click: right_click_behavior {
             compatible = "zmk,behavior-mouse-key";
             label = "RIGHT_CLICK";
