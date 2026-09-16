@@ -56,6 +56,8 @@
         };
 
         lang2 {
+            // LANG2 is IME Off on Windows; keep it out of thumb-shift chords.
+            layers = <0>;
             bindings = <&kp LANGUAGE_2>;
             key-positions = <35 34>;
         };
