@@ -51,3 +51,10 @@ properties:
     description: |
       【Conductor拡張】抑止された単独タップをこの時間 (ms) 以内に繰り返した場合は
       意図的とみなして通す。
+  guard-timeout-ms:
+    type: int
+    default: 3000
+    description: |
+      【Conductor拡張】未確定文字の推定を自動解除する無操作時間 (ms)。かな送出後、
+      最後のキー押下からこの時間が経過していれば、未確定文字は消えたとみなして
+      pending-guard の抑止を行わない。0 で無効 (Enter/Esc/英数の押下のみで解除)。

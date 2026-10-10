@@ -126,6 +126,7 @@ struct behavior_nicola_config {
     uint32_t rthumb;
     int32_t guard;           /* Conductor拡張: pending-guard */
     int32_t guard_repeat_ms; /* Conductor拡張: guard-repeat-ms */
+    int32_t guard_timeout_ms; /* Conductor拡張: guard-timeout-ms */
 };
 
 /* 連続シフト (DTの continuous-shift, 既定オフ)。オンの場合、親指キーを
@@ -170,9 +171,14 @@ static bool nc_l_judged, nc_r_judged;
  * 直接は知れないので、自分が送ったキーからの推定である。guard-repeat-ms 以内に同じ単独
  * タップを繰り返した場合は意図的とみなして通す。 */
 static bool nc_pending;                 /* かな送出後、Enter/Esc未検出 */
+static int64_t nc_pending_ts;           /* 推定中の最後のキー活動時刻 (無操作判定の基準) */
 static int64_t nc_guard_ts;             /* 直近で抑止した単独タップの時刻 (0=なし) */
 static bool nc_guard_on = true;         /* DT pending-guard */
 static int32_t nc_guard_repeat_ms = 1000; /* DT guard-repeat-ms */
+/* 推定の自動解除: 最後のキー活動からこの時間 (ms) 無操作なら未確定文字は消えたとみなす。
+ * Backspaceでの全消し・マウスでの確定・アプリ切替など、キーボードから見えない確定の
+ * 後に英数が飲まれ続けるのを防ぐ。0 で無効 (Enter/Esc/LANG2 のみで解除)。 */
+static int32_t nc_guard_timeout_ms = 3000; /* DT guard-timeout-ms */
 #define NC_NO_LAYER 0xFF /* &ncl/&ncr の param2: 単独タップでレイヤーを離脱しない */
 
 /* 修飾キー押下中に素通ししたキー (releaseも素通しするため記録) */
@@ -253,6 +259,7 @@ static void nc_type_with(int64_t ts, bool lsh, bool rsh) {
         nc_send_romaji(out, ts);
         if (*out != '\0') {
             nc_pending = true; /* IME上に未確定文字が生じたと推定 */
+            nc_pending_ts = ts;
         }
     }
     nc_chrcount = 0;
@@ -364,6 +371,13 @@ static void nc_thumb_pressed(bool left, int64_t ts) {
  * 未確定文字の推定ガードを適用する。 */
 static void nc_solo_tap(int64_t ts, uint32_t tap_kc, uint32_t leave_layer) {
     const bool leaves = leave_layer != NC_NO_LAYER;
+    if (leaves && nc_guard_on && nc_pending && nc_guard_timeout_ms > 0 &&
+        (ts - nc_pending_ts) > nc_guard_timeout_ms) {
+        nc_emit("pending expired: %dms idle > %dms", (int32_t)(ts - nc_pending_ts),
+                nc_guard_timeout_ms);
+        nc_pending = false;
+        nc_guard_ts = 0;
+    }
     if (leaves && nc_guard_on && nc_pending) {
         if (nc_guard_ts != 0 && (ts - nc_guard_ts) <= nc_guard_repeat_ms) {
             nc_emit("solo tap: repeated within %dms -> pass through", nc_guard_repeat_ms);
@@ -403,11 +417,16 @@ static void nc_thumb_released(bool left, int64_t ts, uint32_t tap_kc, uint32_t l
 }
 
 /* Enter / Esc / 英数(LANG2) の押下を見たら未確定文字は消えたと推定する。
- * 自分が送出したローマ字もここを通るが、Enter/Esc/LANG2 は含まれない。 */
+ * 自分が送出したローマ字もここを通るが、Enter/Esc/LANG2 は含まれない。
+ * それ以外のキー押下 (変換のSpace、候補選択の矢印、自分のローマ字出力など) は
+ * 「まだIMEを操作中」とみなし、無操作判定の基準時刻を更新する。 */
 static int nc_keycode_listener(const zmk_event_t *eh) {
     const struct zmk_keycode_state_changed *ev = as_zmk_keycode_state_changed(eh);
     if (ev == NULL || !ev->state || ev->usage_page != HID_USAGE_KEY) {
         return ZMK_EV_EVENT_BUBBLE;
+    }
+    if (nc_pending) {
+        nc_pending_ts = ev->timestamp;
     }
     switch (ev->keycode) {
     case HID_USAGE_KEY_KEYBOARD_RETURN_ENTER:
@@ -549,6 +568,7 @@ static int behavior_nicola_init(const struct device *dev) {
     nc_rthumb_tap = cfg->rthumb;
     nc_guard_on = cfg->guard != 0;
     nc_guard_repeat_ms = CLAMP(cfg->guard_repeat_ms, 100, 10000);
+    nc_guard_timeout_ms = cfg->guard_timeout_ms <= 0 ? 0 : CLAMP(cfg->guard_timeout_ms, 500, 60000);
     nc_reset();
     return 0;
 }
@@ -768,7 +788,8 @@ static const struct behavior_driver_api behavior_nicola_driver_api = {
         .lthumb = DT_INST_PROP_OR(n, left_thumb, SPACE),                                           \
         .rthumb = DT_INST_PROP_OR(n, right_thumb, INT4),                                           \
         .guard = DT_INST_PROP(n, pending_guard),                                                   \
-        .guard_repeat_ms = DT_INST_PROP(n, guard_repeat_ms),                                           \
+        .guard_repeat_ms = DT_INST_PROP(n, guard_repeat_ms),                                       \
+        .guard_timeout_ms = DT_INST_PROP(n, guard_timeout_ms),                                     \
     };                                                                                             \
     BEHAVIOR_DT_INST_DEFINE(n, behavior_nicola_init, NULL, NULL, &behavior_nicola_config_##n,      \
                             POST_KERNEL, CONFIG_KERNEL_INIT_PRIORITY_DEFAULT,                      \

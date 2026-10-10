@@ -34,6 +34,8 @@
 // - 連続シフト: オン（親指を押し続けている間、後続の文字にもシフトがかかる）。
 // - 未確定ガード: かなを送出してから Enter/Esc を見るまでは、左親指単独タップの英数を抑止。
 //   同じタップを guard-repeat-ms 以内に繰り返すと通す。
+//   最後のキー押下から guard-timeout-ms 無操作なら未確定文字は消えたとみなして抑止しない
+//   （Backspaceでの全消しやマウスでの確定など、キーボードから見えない確定への備え）。
 &nc {
     timeout-ms = <70>;
     continuous-shift = <1>;
@@ -41,6 +43,7 @@
     right-thumb = <LANGUAGE_1>;
     pending-guard = <1>;
     guard-repeat-ms = <1000>;
+    guard-timeout-ms = <3000>;
 };
 
 &mt {

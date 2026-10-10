@@ -17,3 +17,8 @@
 ## 2026-10-10（2回目）
 
 - `src/behavior_nicola.c` の `nmap`: 小書きかな・促音のローマ字を `l` 接頭から `x` 接頭へ変更（ぁぃぅぇぉ＝xa/xi/xu/xe/xo、ゃゅょ＝xya/xyu/xyo、っ＝xtu）。macOS の日本語IMは `l` 接頭を受け付けず「ｌつ」になるため。Google日本語入力・MS-IME・ATOK は `x` も受け付ける。
+
+## 2026-10-10（3回目）
+
+- `src/behavior_nicola.c`: 未確定文字の推定ガードに無操作タイムアウトを追加。かな送出後に見たキー押下（自分のローマ字出力・変換のSpace・矢印など）のたびに `nc_pending_ts` を更新し、英数の単独タップ時に最後の活動から `guard-timeout-ms` を超えていれば `nc_pending` を下ろして抑止しない。Backspaceでの全消し・マウスクリック・アプリ切替・自動確定など、Enter/Esc/LANG2 を経ない確定の後に英数が飲まれ続ける問題への対策。
+- `dts/bindings/behaviors/zmk,behavior-nicola.yaml`: `guard-timeout-ms`（既定3000、0で無効）を追加。
