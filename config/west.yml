@@ -11,16 +11,48 @@ manifest:
   projects:
     - name: zmk
       remote: zmkfirmware
-      revision: v0.3
+      revision: edf5c0814fd3ea202e43aad2d68fd32e882a518c # ZMK v0.3
       import: app/west.yml
+    # Root definitions override imported projects. Preserve Zephyr's module import.
+    - name: zephyr
+      remote: zmkfirmware
+      revision: dacab4875df72109b96cc8977547a0dc04875bcd
+      import:
+        name-blocklist:
+          - ci-tools
+          - hal_altera
+          - hal_cypress
+          - hal_infineon
+          - hal_microchip
+          - hal_nxp
+          - hal_openisa
+          - hal_silabs
+          - hal_xtensa
+          - hal_st
+          - hal_ti
+          - loramac-node
+          - mcuboot
+          - mcumgr
+          - net-tools
+          - openthread
+          - edtt
+          - trusted-firmware-m
+    - name: nanopb
+      remote: zmkfirmware
+      revision: 8c60555d6277a0360c876bd85d491fc4fb0cd74a
+      path: modules/lib/nanopb
+    - name: zmk-studio-messages
+      remote: zmkfirmware
+      revision: 6cb4c283e76209d59c45fbcb218800cd19e9339d
+      path: modules/msgs/zmk-studio-messages
     - name: zmk-pmw3610-driver
       remote: pite1222
-      revision: main
+      revision: c05f535a51bd03ab62c6e2abc18e7a351c8e01c8
     - name: zmk-rgbled-widget
       remote: pite1222
-      revision: critical-steady-light
+      revision: a4f593acb74afab7f8f3ab97ee1afa816dbc8dfb
     - name: zmk-feature-charge-indicator
       remote: 4mplelab
-      revision: main
+      revision: f0d311ed7804cda0e5837ef902f0419aeace4a88
   self:
     path: config

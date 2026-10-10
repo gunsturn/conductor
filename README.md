@@ -27,6 +27,16 @@ Windows用レイヤーでは、左の言語キー（位置34）は無変換、�
 
 `LANGUAGE_2`はWindowsでIMEオフに対応するため、この制限で親指入力と英数切替の競合を避けます（[Microsoftのキー仕様](https://learn.microsoft.com/en-us/windows-hardware/design/component-guidelines/keyboard-japan-ime)）。入力ソフトやIME側の単押し設定による切替は別途設定を確認してください。
 
+## 依存とビルド環境の更新
+
+`config/west.yml`のZMK、Zephyr、追加moduleは、成功済みの[run 35062608057](https://github.com/gunsturn/conductor/actions/runs/35062608057)を基準にcommit SHAへ固定しています。Zephyrのimportは上流と同じ除外リストを維持しています。
+
+CIは`.github/workflows/build-pinned.yml`を使います。ZMK v0.3のworkflowを基に、Actionsを完全なcommit SHA、ビルドコンテナをSHA-256 digestへ固定しました。tokenは`contents: read`のみ、checkout後には認証情報を残しません。westソースの共有キャッシュ復元は行わず、各runで`west manifest --freeze --active-only`をログへ出します。GitHub-hosted runner自体のイメージは固定対象外です。
+
+2026-10-03に同じcontainer digestのarm64環境で、現在の右・左・settings_resetの3ビルドとUF2生成を確認しました。GitHub Actionsのartifact upload/mergeと実機書込みは、このローカル検証には含みません。
+
+更新時は、依存とコンテナの一次情報・アドバイザリを確認し、上流workflowとの差分をレビューしてください。右（Studio有効）・左・settings_resetの3buildとartifact結合を確認してから採用します。firmwareの実機書込みは別操作です。
+
 ## ライセンス
 
 このプロジェクトは **MIT License** の下で公開されています。詳細については、[LICENSE](LICENSE) ファイルをご覧ください。
