@@ -1,11 +1,47 @@
 #include <behaviors.dtsi>
+#include <behaviors/nicola.dtsi>
 #include <dt-bindings/zmk/bt.h>
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/pointing.h>
 
-#define MOUSE 6
-#define SCROLL 7
-#define NUM 8
+// レイヤー番号。NICOLA（親指シフト）レイヤーを基本レイヤーの直上に置き、FUNCTION 以降の
+// ユーティリティレイヤーはその上に重なるようにする（NICOLA 中でも Space/Tab/Backspace の
+// 長押しレイヤーが従来どおり使える）。番号を変えるときは monokey_R.overlay の
+// zip_temp_layer / scroll-layers と monokey_R.conf の LAYER_n_COLOR も合わせる。
+#define L_MAC        0
+#define L_WIN        1
+#define L_NICOLA_MAC 2
+#define L_NICOLA_WIN 3
+#define L_FUNC       4
+#define L_NUM        5
+#define L_WIN_NUM    6
+#define L_ARROW      7
+#define L_MOUSE      8
+#define L_SCROLL     9
+#define L_BT         10
+#define L_SPARE_A    11
+#define L_SPARE_B    12
+#define L_SPARE_C    13
+#define L_SPARE_D    14
+
+// 文字キー同士の combo を NICOLA レイヤーでは無効にする（かなの高速ロールオーバーを
+// combo が食わないようにする）。combo の layers に指定する。
+#define NON_NICOLA_LAYERS L_MAC L_WIN L_FUNC L_NUM L_WIN_NUM L_ARROW L_MOUSE L_SCROLL L_BT L_SPARE_A L_SPARE_B L_SPARE_C L_SPARE_D
+
+// 親指シフト（NICOLA）の判定設定。Lacaille の使用感に合わせた初期値。
+// - 判定方式: ms 方式（文字キーと親指キーの押下間隔が timeout-ms 以内なら同時打鍵）。
+//   親指を先に押して遅れて文字を打った場合は窓に関係なくシフトがかかる。
+// - 連続シフト: オン（親指を押し続けている間、後続の文字にもシフトがかかる）。
+// - 未確定ガード: かなを送出してから Enter/Esc を見るまでは、左親指単独タップの英数を抑止。
+//   同じタップを guard-repeat-ms 以内に繰り返すと通す。
+&nc {
+    timeout-ms = <70>;
+    continuous-shift = <1>;
+    left-thumb = <LANGUAGE_2>;
+    right-thumb = <LANGUAGE_1>;
+    pending-guard = <1>;
+    guard-repeat-ms = <1000>;
+};
 
 &mt {
     flavor = "balanced";
@@ -19,50 +55,59 @@
         compatible = "zmk,combos";
 
         scroll {
-            bindings = <&mo 7>;
+            layers = <NON_NICOLA_LAYERS>;
+            bindings = <&mo L_SCROLL>;
             key-positions = <17 18>;
         };
 
         mb3 {
+            layers = <NON_NICOLA_LAYERS>;
             bindings = <&mkp MB3>;
             key-positions = <19 18>;
         };
 
         right_ctrl {
+            layers = <NON_NICOLA_LAYERS>;
             bindings = <&kp RCTRL>;
             key-positions = <28 29>;
         };
 
         left_ctrl {
+            layers = <NON_NICOLA_LAYERS>;
             bindings = <&kp LCTRL>;
             key-positions = <20 21>;
         };
 
         changewin {
+            layers = <NON_NICOLA_LAYERS>;
             timeout-ms = <50>;
-            bindings = <&os_switch_hold 1 0>;
+            bindings = <&os_switch_hold L_WIN 0>;
             key-positions = <6 8>;
         };
 
         tomac {
+            layers = <NON_NICOLA_LAYERS>;
             timeout-ms = <50>;
-            bindings = <&os_switch_hold 0 0>;
+            bindings = <&os_switch_hold L_MAC 0>;
             key-positions = <7 8>;
         };
 
         lang1 {
+            // NICOLA レイヤーでは位置37が右親指シフトなので除外する。
+            layers = <NON_NICOLA_LAYERS>;
             bindings = <&kp LANGUAGE_1>;
             key-positions = <36 37>;
         };
 
         lang2 {
             // LANG2 is IME Off on Windows; keep it out of thumb-shift chords.
-            layers = <0>;
+            layers = <L_MAC>;
             bindings = <&kp LANGUAGE_2>;
             key-positions = <35 34>;
         };
 
         win {
+            layers = <NON_NICOLA_LAYERS>;
             bindings = <&kp LEFT_GUI>;
             key-positions = <24 23>;
         };
@@ -114,6 +159,24 @@
                 <&macro_release>,
                 <&kp LANG2>;
         };
+
+        // かなキー（位置37）: IME をかなにしてから NICOLA レイヤーへ入る。
+        // 戻るときは NICOLA レイヤー内の左親指（英数）単独タップが LANG2 を送ってレイヤーを抜ける。
+        kana_mac: kana_mac {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <10>;
+            tap-ms = <10>;
+            bindings = <&kp LANGUAGE_1 &tog L_NICOLA_MAC>;
+        };
+
+        kana_win: kana_win {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <10>;
+            tap-ms = <10>;
+            bindings = <&kp LANGUAGE_1 &tog L_NICOLA_WIN>;
+        };
     };
 
     keymap {
@@ -121,10 +184,10 @@
 
         default_layer {
             bindings = <
-&kp Q           &kp W         &kp E             &kp R            &kp T                                   &kp Y           &kp U  &kp I      &kp O            &kp P
-&kp A           &kp S         &kp D             &kp F            &kp G                                   &kp H           &kp J  &kp K      &kp L            &kp SEMICOLON
-&kp Z           &kp X         &kp C             &kp V            &kp B                                   &kp N           &kp M  &kp COMMA  &kp PERIOD       &kp SLASH
-&kp LEFT_SHIFT  &kp LEFT_ALT  &kp LEFT_COMMAND  &lt 5 BACKSPACE  &kp LANGUAGE_2  &lt 2 SPACE  &lt 3 TAB  &kp LANGUAGE_1                    &kp RIGHT_SHIFT  &kp RET
+&kp Q           &kp W         &kp E             &kp R                  &kp T                                               &kp Y           &kp U  &kp I      &kp O            &kp P
+&kp A           &kp S         &kp D             &kp F                  &kp G                                               &kp H           &kp J  &kp K      &kp L            &kp SEMICOLON
+&kp Z           &kp X         &kp C             &kp V                  &kp B                                               &kp N           &kp M  &kp COMMA  &kp PERIOD       &kp SLASH
+&kp LEFT_SHIFT  &kp LEFT_ALT  &kp LEFT_COMMAND  &lt L_ARROW BACKSPACE  &kp LANGUAGE_2  &lt L_FUNC SPACE  &lt L_NUM TAB     &kana_mac                         &kp RIGHT_SHIFT  &kp RET
             >;
 
             sensor-bindings = <&inc_dec_kp PG_UP PAGE_DOWN>;
@@ -132,21 +195,45 @@
 
         Windows {
             bindings = <
-&kp Q      &kp W         &kp E             &kp R            &kp T                                     &kp Y           &kp U  &kp I      &kp O       &kp P
-&kp A      &kp S         &kp D             &kp F            &kp G                                     &kp H           &kp J  &kp K      &kp L       &kp SEMICOLON
-&kp Z      &kp X         &kp C             &kp V            &kp B                                     &kp N           &kp M  &kp COMMA  &kp PERIOD  &kp SLASH
-&kp LSHFT  &kp LEFT_ALT  &kp LEFT_CONTROL  &lt 5 BACKSPACE  &kp INT_MUHENKAN  &lt 2 SPACE  &lt 4 TAB  &kp INT_HENKAN                    &kp RSHIFT  &kp RET
+&kp Q      &kp W         &kp E             &kp R                  &kp T                                                     &kp Y           &kp U  &kp I      &kp O       &kp P
+&kp A      &kp S         &kp D             &kp F                  &kp G                                                     &kp H           &kp J  &kp K      &kp L       &kp SEMICOLON
+&kp Z      &kp X         &kp C             &kp V                  &kp B                                                     &kp N           &kp M  &kp COMMA  &kp PERIOD  &kp SLASH
+&kp LSHFT  &kp LEFT_ALT  &kp LEFT_CONTROL  &lt L_ARROW BACKSPACE  &kp INT_MUHENKAN  &lt L_FUNC SPACE  &lt L_WIN_NUM TAB     &kana_win                         &kp RSHIFT  &kp RET
             >;
 
             sensor-bindings = <&inc_dec_kp PG_UP PAGE_DOWN>;
         };
 
+        // 親指シフト（NICOLA）。文字キーは &nc、親指キーは &ncl / &ncr。
+        // 左親指（位置34）単独タップ = 英数(LANG2) を送ってこのレイヤーを抜ける。
+        // 右親指（位置37）単独タップ = かな(LANG1) を送る（レイヤーは維持）。
+        // それ以外のキーは &trans で下のレイヤー（Space/Tab/Backspace の長押しなど）に落とす。
+        nicola_mac {
+            display-name = "NICOLA Mac";
+            bindings = <
+&nc Q   &nc W   &nc E   &nc R   &nc T                                                   &nc Y   &nc U   &nc I      &nc O    &nc P
+&nc A   &nc S   &nc D   &nc F   &nc G                                                   &nc H   &nc J   &nc K      &nc L    &nc SEMI
+&nc Z   &nc X   &nc C   &nc V   &nc B                                                   &nc N   &nc M   &nc COMMA  &nc DOT  &nc SLASH
+&trans  &trans  &trans  &trans  &ncl LANGUAGE_2 L_NICOLA_MAC  &trans  &trans            &ncr LANGUAGE_1 NC_KEEP_LAYER       &trans   &trans
+            >;
+        };
+
+        nicola_win {
+            display-name = "NICOLA Win";
+            bindings = <
+&nc Q   &nc W   &nc E   &nc R   &nc T                                                   &nc Y   &nc U   &nc I      &nc O    &nc P
+&nc A   &nc S   &nc D   &nc F   &nc G                                                   &nc H   &nc J   &nc K      &nc L    &nc SEMI
+&nc Z   &nc X   &nc C   &nc V   &nc B                                                   &nc N   &nc M   &nc COMMA  &nc DOT  &nc SLASH
+&trans  &trans  &trans  &trans  &ncl LANGUAGE_2 L_NICOLA_WIN  &trans  &trans            &ncr LANGUAGE_1 NC_KEEP_LAYER       &trans   &trans
+            >;
+        };
+
         FUNCTION {
             bindings = <
-&kp LS(NUMBER_2)  &trans  &trans  &kp C_BRI_INC  &kp C_VOL_UP                     &trans                 &trans           &trans    &kp SINGLE_QUOTE  &kp DOUBLE_QUOTES
-&kp ESC           &trans  &trans  &kp C_BRI_DEC  &kp C_VOL_DN                     &kp LEFT_PARENTHESIS   &kp LEFT_BRACE   &mkp MB1  &mkp MB2          &kp LEFT_BRACKET
-&trans            &trans  &trans  &trans         &kp C_MUTE                       &kp RIGHT_PARENTHESIS  &kp RIGHT_BRACE  &trans    &trans            &kp RIGHT_BRACKET
-&trans            &trans  &trans  &trans         &mo 8         &trans  &kp SPACE  &trans                                            &trans            &trans
+&kp LS(NUMBER_2)  &trans  &trans  &kp C_BRI_INC  &kp C_VOL_UP                        &trans                 &trans           &trans    &kp SINGLE_QUOTE  &kp DOUBLE_QUOTES
+&kp ESC           &trans  &trans  &kp C_BRI_DEC  &kp C_VOL_DN                        &kp LEFT_PARENTHESIS   &kp LEFT_BRACE   &mkp MB1  &mkp MB2          &kp LEFT_BRACKET
+&trans            &trans  &trans  &trans         &kp C_MUTE                          &kp RIGHT_PARENTHESIS  &kp RIGHT_BRACE  &trans    &trans            &kp RIGHT_BRACKET
+&trans            &trans  &trans  &trans         &mo L_BT      &trans  &kp SPACE     &trans                                            &trans            &trans
             >;
         };
 

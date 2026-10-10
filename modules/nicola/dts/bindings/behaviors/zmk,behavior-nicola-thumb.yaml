@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Conductor拡張: 親指シフトキー専用 behavior
+
+description: NICOLA thumb shift key (left or right)
+
+compatible: "zmk,behavior-nicola-thumb"
+
+include: two_param.yaml
+
+properties:
+  side:
+    type: int
+    required: true
+    description: |
+      0 = 左親指シフト、1 = 右親指シフト。
+      binding の第1引数は単独タップで送出するキーコード、第2引数は単独タップで
+      離脱 (deactivate) するレイヤー番号。NC_KEEP_LAYER (255) なら離脱しない。

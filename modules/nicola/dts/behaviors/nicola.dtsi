@@ -1,0 +1,37 @@
+/*
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ */
+
+/* &ncl / &ncr の第2引数: 単独タップでレイヤーを離脱しない */
+#define NC_KEEP_LAYER 255
+
+/ {
+    behaviors {
+        /omit-if-no-ref/ nc: nicola {
+            compatible = "zmk,behavior-nicola";
+            #binding-cells = <1>;
+            display-name = "NICOLA";
+        };
+
+        /* Conductor拡張: 親指シフトキー。&ncl <単独タップのキー> <離脱するレイヤー> */
+        /omit-if-no-ref/ ncl: nicola_thumb_left {
+            compatible = "zmk,behavior-nicola-thumb";
+            #binding-cells = <2>;
+            side = <0>;
+            display-name = "NICOLA L thumb";
+        };
+
+        /omit-if-no-ref/ ncr: nicola_thumb_right {
+            compatible = "zmk,behavior-nicola-thumb";
+            #binding-cells = <2>;
+            side = <1>;
+            display-name = "NICOLA R thumb";
+        };
+
+        /omit-if-no-ref/ ime_settle: ime_settle {
+            compatible = "zmk,behavior-ime-settle";
+            #binding-cells = <1>;
+            display-name = "IME settle";
+        };
+    };
+};

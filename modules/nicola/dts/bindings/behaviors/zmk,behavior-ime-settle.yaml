@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+
+description: |
+  IMEキー送出直後の打鍵出力をファーム内で一定時間(param1 ms)保留し、
+  ホスト側のIME切替完了を待ってから元の順序で再送出する。
+  切替マクロ内でIMEキーの直後に &ime_settle <ms> として使う。
+
+compatible: "zmk,behavior-ime-settle"
+
+include: one_param.yaml

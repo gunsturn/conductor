@@ -1,0 +1,53 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+
+description: NICOLA (oyayubi shift) behavior
+
+compatible: "zmk,behavior-nicola"
+
+include: one_param.yaml
+
+properties:
+  timeout-ms:
+    type: int
+    default: 130
+    description: |
+      文字キー押下から親指キー押下までを同時打鍵とみなす時間 (ms)。
+      この時間を超えて親指キーが押された場合、保留中の文字キーは
+      単独打鍵として確定される。判定・出力は親指キー押下の瞬間に行う。
+      親指キー先行(連続シフト)には適用されない。
+  range-pct:
+    type: int
+    default: 65
+    description: |
+      【このブランチ(main)では未使用】range-pctブランチ(やまぶきR風%方式)用の設定。
+      同じキーマップを両ブランチで使えるように宣言だけしてある。
+  left-thumb:
+    type: int
+    description: |
+      左親指シフトキーのキーコード (既定 SPACE)。単独タップ時はこのキー自身を送出。
+      変更した場合はキーマップ側の &nc <キーコード> も合わせること。
+  continuous-shift:
+    type: int
+    default: 0
+    description: |
+      連続シフト (1=オン, 0=オフ)。オンの場合、親指キーを押している間は
+      後続の文字キーにもシフトをかけ続ける。オフの場合、シフトは同時打鍵が
+      成立した1文字のみで、次にシフトするには親指キーを押し直す。
+  right-thumb:
+    type: int
+    description: |
+      右親指シフトキーのキーコード (既定 INT4=変換)。単独タップ時はこのキー自身を送出。
+      変更した場合はキーマップ側の &nc <キーコード> も合わせること。
+  pending-guard:
+    type: int
+    default: 1
+    description: |
+      【Conductor拡張】未確定文字の推定ガード (1=オン, 0=オフ)。かなを送出してから
+      Enter/Esc/英数の押下を見るまでは IME 上に未確定文字が残っていると推定し、
+      &ncl/&ncr でレイヤー離脱を伴う単独タップ (英数=IMEオフ) を抑止する。
+  guard-repeat-ms:
+    type: int
+    default: 1000
+    description: |
+      【Conductor拡張】抑止された単独タップをこの時間 (ms) 以内に繰り返した場合は
+      意図的とみなして通す。
