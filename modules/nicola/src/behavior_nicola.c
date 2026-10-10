@@ -95,23 +95,23 @@ struct nc_map {
 };
 
 static const struct nc_map nmap[] = {
-    {Q, ".", "la", ""},      {W, "ka", "e", "ga"},    {E, "ta", "ri", "da"},
-    {R, "ko", "lya", "go"},  {T, "sa", "re", "za"},
+    {Q, ".", "xa", ""},      {W, "ka", "e", "ga"},    {E, "ta", "ri", "da"},
+    {R, "ko", "xya", "go"},  {T, "sa", "re", "za"},
 
     {Y, "ra", "pa", "yo"},   {U, "ti", "di", "ni"},   {I, "ku", "gu", "ru"},
-    {O, "tu", "du", "ma"},   {P, ",", "pi", "le"},
+    {O, "tu", "du", "ma"},   {P, ",", "pi", "xe"},
 
     {A, "u", "wo", "vu"},    {S, "si", "a", "zi"},    {D, "te", "na", "de"},
-    {F, "ke", "lyu", "ge"},  {G, "se", "mo", "ze"},
+    {F, "ke", "xyu", "ge"},  {G, "se", "mo", "ze"},
 
     {H, "ha", "ba", "mi"},   {J, "to", "do", "o"},    {K, "ki", "gi", "no"},
-    {L, "i", "po", "lyo"},   {SEMI, "nn", "", "ltu"},
+    {L, "i", "po", "xyo"},   {SEMI, "nn", "", "xtu"},
 
-    {Z, ".", "lu", ""},      {X, "hi", "-", "bi"},    {C, "su", "ro", "zu"},
-    {V, "hu", "ya", "bu"},   {B, "he", "li", "be"},
+    {Z, ".", "xu", ""},      {X, "hi", "-", "bi"},    {C, "su", "ro", "zu"},
+    {V, "hu", "ya", "bu"},   {B, "he", "xi", "be"},
 
     {N, "me", "pu", "nu"},   {M, "so", "zo", "yu"},   {COMMA, "ne", "pe", "mu"},
-    {DOT, "ho", "bo", "wa"}, {SLASH, "/", "?", "lo"},
+    {DOT, "ho", "bo", "wa"}, {SLASH, "/", "?", "xo"},
 
     /* NICOLA-J規格 D11: @キー 単独=、(読点)。シフト面(゛)はローマ字入力では表現不能のため未割当 */
     {LBKT, ",", "", ""},

@@ -13,3 +13,7 @@
 - `dts/bindings/behaviors/zmk,behavior-nicola-thumb.yaml`: 新規。
 - `dts/bindings/behaviors/zmk,behavior-nicola.yaml`: 2プロパティ追加。
 - 未変更: `CMakeLists.txt`、`Kconfig`、`include/`、`src/config_console.c`、`src/ime_settle.c`、`LICENSE`、`README.md`（取込元の説明のまま）。
+
+## 2026-10-10（2回目）
+
+- `src/behavior_nicola.c` の `nmap`: 小書きかな・促音のローマ字を `l` 接頭から `x` 接頭へ変更（ぁぃぅぇぉ＝xa/xi/xu/xe/xo、ゃゅょ＝xya/xyu/xyo、っ＝xtu）。macOS の日本語IMは `l` 接頭を受け付けず「ｌつ」になるため。Google日本語入力・MS-IME・ATOK は `x` も受け付ける。
