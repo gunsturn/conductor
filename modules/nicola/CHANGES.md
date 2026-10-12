@@ -22,3 +22,8 @@
 
 - `src/behavior_nicola.c`: 未確定文字の推定ガードに無操作タイムアウトを追加。かな送出後に見たキー押下（自分のローマ字出力・変換のSpace・矢印など）のたびに `nc_pending_ts` を更新し、英数の単独タップ時に最後の活動から `guard-timeout-ms` を超えていれば `nc_pending` を下ろして抑止しない。Backspaceでの全消し・マウスクリック・アプリ切替・自動確定など、Enter/Esc/LANG2 を経ない確定の後に英数が飲まれ続ける問題への対策。
 - `dts/bindings/behaviors/zmk,behavior-nicola.yaml`: `guard-timeout-ms`（既定3000、0で無効）を追加。
+
+## 2026-10-12
+
+- `src/behavior_nicola.c`: 未確定かな数の推定を追加。かな送出で `nc_pending_n` を +1、Backspace/Delete の押下で -1 し、0 になれば推定を解除する（Backspaceで全文を消した直後の英数が1回で通る）。Space/変換を見た後の最初の Backspace は変換取消として数えない。変換中に次のかなを送ると前の文節は確定したとみなして数え直す。修飾キー付きの Backspace/Delete と、`guard-bs-hold-ms` 以上押し続けた Backspace/Delete（OSのオートリピート）は全消しとみなして解除する。解除処理は `nc_pending_clear` に集約。
+- `dts/bindings/behaviors/zmk,behavior-nicola.yaml`: `guard-bs-hold-ms`（既定500、0で無効）を追加。

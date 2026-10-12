@@ -127,6 +127,7 @@ struct behavior_nicola_config {
     int32_t guard;           /* Conductor拡張: pending-guard */
     int32_t guard_repeat_ms; /* Conductor拡張: guard-repeat-ms */
     int32_t guard_timeout_ms; /* Conductor拡張: guard-timeout-ms */
+    int32_t guard_bs_hold_ms; /* Conductor拡張: guard-bs-hold-ms */
 };
 
 /* 連続シフト (DTの continuous-shift, 既定オフ)。オンの場合、親指キーを
@@ -179,6 +180,14 @@ static int32_t nc_guard_repeat_ms = 1000; /* DT guard-repeat-ms */
  * Backspaceでの全消し・マウスでの確定・アプリ切替など、キーボードから見えない確定の
  * 後に英数が飲まれ続けるのを防ぐ。0 で無効 (Enter/Esc/LANG2 のみで解除)。 */
 static int32_t nc_guard_timeout_ms = 3000; /* DT guard-timeout-ms */
+/* 未確定かな数の推定: かな送出で +1、Backspace/Delete の押下で -1、0 になれば推定解除。
+ * Space/変換を見た後の最初の Backspace は変換の取消であって削除ではないので数えない。
+ * 変換中に次のかなを送ると前の文節は確定するので数え直す。修飾キー付きの Backspace
+ * (単語/行削除) と、guard-bs-hold-ms 以上の長押し (OSのオートリピート) は全消しとみなす。 */
+static int nc_pending_n;                /* 推定の未確定かな数 */
+static bool nc_converting;              /* Space/変換を見た後 */
+static int64_t nc_bs_down_ts;           /* Backspace/Delete の押下時刻 (0=押されていない) */
+static int32_t nc_guard_bs_hold_ms = 500; /* DT guard-bs-hold-ms */
 #define NC_NO_LAYER 0xFF /* &ncl/&ncr の param2: 単独タップでレイヤーを離脱しない */
 
 /* 修飾キー押下中に素通ししたキー (releaseも素通しするため記録) */
@@ -248,6 +257,16 @@ static void nc_send_romaji(const char *s, int64_t ts) {
 /* バッファの文字キーを指定シフト面で確定する。
  * 原典の ncl_type() + ncl_clear() に相当するが、親指キーが物理的に
  * 押されている間はシフト状態(keycount=1)を維持する(連続シフト)。 */
+static void nc_pending_clear(const char *why) {
+    if (nc_pending) {
+        nc_emit("pending cleared: %s", why);
+    }
+    nc_pending = false;
+    nc_pending_n = 0;
+    nc_converting = false;
+    nc_guard_ts = 0;
+}
+
 static void nc_type_with(int64_t ts, bool lsh, bool rsh) {
     for (int i = 0; i < nc_chrcount; i++) {
         const struct nc_map *m = nc_find(nc_buf[i]);
@@ -258,6 +277,13 @@ static void nc_type_with(int64_t ts, bool lsh, bool rsh) {
         nc_emit("out '%s' plane=%c (key '%s')", out, lsh ? 'L' : (rsh ? 'R' : '-'), m->t);
         nc_send_romaji(out, ts);
         if (*out != '\0') {
+            if (nc_converting) { /* 変換中の新しい入力は前の文節を確定させる */
+                nc_pending_n = 0;
+                nc_converting = false;
+            }
+            if (nc_pending_n < 1000) {
+                nc_pending_n++;
+            }
             nc_pending = true; /* IME上に未確定文字が生じたと推定 */
             nc_pending_ts = ts;
         }
@@ -375,8 +401,7 @@ static void nc_solo_tap(int64_t ts, uint32_t tap_kc, uint32_t leave_layer) {
         (ts - nc_pending_ts) > nc_guard_timeout_ms) {
         nc_emit("pending expired: %dms idle > %dms", (int32_t)(ts - nc_pending_ts),
                 nc_guard_timeout_ms);
-        nc_pending = false;
-        nc_guard_ts = 0;
+        nc_pending_clear("idle timeout");
     }
     if (leaves && nc_guard_on && nc_pending) {
         if (nc_guard_ts != 0 && (ts - nc_guard_ts) <= nc_guard_repeat_ms) {
@@ -391,7 +416,7 @@ static void nc_solo_tap(int64_t ts, uint32_t tap_kc, uint32_t leave_layer) {
     nc_guard_ts = 0;
     nc_tap(tap_kc, ts);
     if (leaves) {
-        nc_pending = false;
+        nc_pending_clear("leave layer");
         nc_emit("leave kana layer %u", leave_layer);
         zmk_keymap_layer_deactivate((zmk_keymap_layer_id_t)leave_layer);
     }
@@ -418,26 +443,62 @@ static void nc_thumb_released(bool left, int64_t ts, uint32_t tap_kc, uint32_t l
 
 /* Enter / Esc / 英数(LANG2) の押下を見たら未確定文字は消えたと推定する。
  * 自分が送出したローマ字もここを通るが、Enter/Esc/LANG2 は含まれない。
- * それ以外のキー押下 (変換のSpace、候補選択の矢印、自分のローマ字出力など) は
+ * Backspace/Delete は未確定かな数を 1 減らし、0 で解除 (変換取消・修飾付き・長押しは上記参照)。
+ * Space/変換は変換開始とみなす。それ以外の押下 (候補選択の矢印、自分のローマ字出力など) は
  * 「まだIMEを操作中」とみなし、無操作判定の基準時刻を更新する。 */
 static int nc_keycode_listener(const zmk_event_t *eh) {
     const struct zmk_keycode_state_changed *ev = as_zmk_keycode_state_changed(eh);
-    if (ev == NULL || !ev->state || ev->usage_page != HID_USAGE_KEY) {
+    if (ev == NULL || ev->usage_page != HID_USAGE_KEY) {
+        return ZMK_EV_EVENT_BUBBLE;
+    }
+    const bool is_del = ev->keycode == HID_USAGE_KEY_KEYBOARD_DELETE_BACKSPACE ||
+                        ev->keycode == HID_USAGE_KEY_KEYBOARD_DELETE_FORWARD;
+    if (!ev->state) {
+        /* release: Backspace/Delete の長押しはオートリピートで残りも消えたとみなす */
+        if (is_del && nc_bs_down_ts != 0) {
+            const int64_t held = ev->timestamp - nc_bs_down_ts;
+            nc_bs_down_ts = 0;
+            if (nc_pending && nc_guard_bs_hold_ms > 0 && held >= nc_guard_bs_hold_ms) {
+                nc_emit("delete held %dms >= %dms", (int32_t)held, nc_guard_bs_hold_ms);
+                nc_pending_clear("long delete");
+            }
+        }
         return ZMK_EV_EVENT_BUBBLE;
     }
     if (nc_pending) {
         nc_pending_ts = ev->timestamp;
+    }
+    if (is_del) {
+        nc_bs_down_ts = ev->timestamp;
+        if (!nc_pending) {
+            return ZMK_EV_EVENT_BUBBLE;
+        }
+        if (nc_mods_active()) {
+            nc_pending_clear("modified delete");
+        } else if (nc_converting) {
+            nc_converting = false; /* 変換の取消。文字は減らない */
+            nc_emit("delete during conversion -> cancel (n=%d)", nc_pending_n);
+        } else {
+            nc_pending_n--;
+            nc_emit("delete -> n=%d", nc_pending_n);
+            if (nc_pending_n <= 0) {
+                nc_pending_clear("all deleted");
+            }
+        }
+        return ZMK_EV_EVENT_BUBBLE;
     }
     switch (ev->keycode) {
     case HID_USAGE_KEY_KEYBOARD_RETURN_ENTER:
     case HID_USAGE_KEY_KEYPAD_ENTER:
     case HID_USAGE_KEY_KEYBOARD_ESCAPE:
     case HID_USAGE_KEY_KEYBOARD_LANG2:
-        if (nc_pending) {
-            nc_emit("pending cleared by keycode 0x%02x", ev->keycode);
+        nc_pending_clear("commit/cancel key");
+        break;
+    case HID_USAGE_KEY_KEYBOARD_SPACEBAR:
+    case HID_USAGE_KEY_KEYBOARD_INTERNATIONAL4: /* 変換 */
+        if (nc_pending && !nc_mods_active()) {
+            nc_converting = true;
         }
-        nc_pending = false;
-        nc_guard_ts = 0;
         break;
     default:
         break;
@@ -569,6 +630,7 @@ static int behavior_nicola_init(const struct device *dev) {
     nc_guard_on = cfg->guard != 0;
     nc_guard_repeat_ms = CLAMP(cfg->guard_repeat_ms, 100, 10000);
     nc_guard_timeout_ms = cfg->guard_timeout_ms <= 0 ? 0 : CLAMP(cfg->guard_timeout_ms, 500, 60000);
+    nc_guard_bs_hold_ms = cfg->guard_bs_hold_ms <= 0 ? 0 : CLAMP(cfg->guard_bs_hold_ms, 100, 5000);
     nc_reset();
     return 0;
 }
@@ -790,6 +852,7 @@ static const struct behavior_driver_api behavior_nicola_driver_api = {
         .guard = DT_INST_PROP(n, pending_guard),                                                   \
         .guard_repeat_ms = DT_INST_PROP(n, guard_repeat_ms),                                       \
         .guard_timeout_ms = DT_INST_PROP(n, guard_timeout_ms),                                     \
+        .guard_bs_hold_ms = DT_INST_PROP(n, guard_bs_hold_ms),                                     \
     };                                                                                             \
     BEHAVIOR_DT_INST_DEFINE(n, behavior_nicola_init, NULL, NULL, &behavior_nicola_config_##n,      \
                             POST_KERNEL, CONFIG_KERNEL_INIT_PRIORITY_DEFAULT,                      \
