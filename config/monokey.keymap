@@ -27,6 +27,11 @@
 // 文字キー同士の combo を NICOLA レイヤーでは無効にする（かなの高速ロールオーバーを
 // combo が食わないようにする）。combo の layers に指定する。
 #define NON_NICOLA_LAYERS L_MAC L_WIN L_FUNC L_NUM L_WIN_NUM L_ARROW L_MOUSE L_SCROLL L_BT L_SPARE_A L_SPARE_B L_SPARE_C L_SPARE_D
+// Ctrl の combo は NICOLA レイヤーでも使う（Mac には Ctrl の物理キーがなく、入力中の
+// Ctrl+K などに必要）。require-prior-idle-ms で直前の打鍵から間が空いたときだけ発火させ、
+// かなの高速ロールオーバーを combo が食わないようにする。
+#define ALL_LAYERS NON_NICOLA_LAYERS L_NICOLA_MAC L_NICOLA_WIN
+#define CTRL_COMBO_IDLE_MS 150
 
 // 親指シフト（NICOLA）の判定設定。Lacaille の使用感に合わせた初期値。
 // - 判定方式: ms 方式（文字キーと親指キーの押下間隔が timeout-ms 以内なら同時打鍵）。
@@ -76,13 +81,15 @@
         };
 
         right_ctrl {
-            layers = <NON_NICOLA_LAYERS>;
+            layers = <ALL_LAYERS>;
+            require-prior-idle-ms = <CTRL_COMBO_IDLE_MS>;
             bindings = <&kp RCTRL>;
             key-positions = <28 29>;
         };
 
         left_ctrl {
-            layers = <NON_NICOLA_LAYERS>;
+            layers = <ALL_LAYERS>;
+            require-prior-idle-ms = <CTRL_COMBO_IDLE_MS>;
             bindings = <&kp LCTRL>;
             key-positions = <20 21>;
         };
@@ -103,8 +110,9 @@
 
         lang1 {
             // NICOLA レイヤーでは位置37が右親指シフトなので除外する。
+            // Shift が押されていても剥がして送る（Shift+かな は macOS でカタカナ固定）。
             layers = <NON_NICOLA_LAYERS>;
-            bindings = <&kp LANGUAGE_1>;
+            bindings = <&lang1_ns>;
             key-positions = <36 37>;
         };
 
@@ -123,6 +131,31 @@
     };
 
     behaviors {
+        // かな (LANG1) を送るキーは、押されている Shift を剥がす。
+        // macOS では Shift+かな がカタカナ固定モードへの切替なので、Shift の離し遅れや
+        // 隣の右 Shift (位置38) との同時押しで偶発的にカタカナになるのを防ぐ。
+        // mod-morph は両方の binding を同じにし、mods に Shift を指定すると Shift をマスクして送る。
+        kana_mac_ns: kana_mac_ns {
+            compatible = "zmk,behavior-mod-morph";
+            #binding-cells = <0>;
+            bindings = <&kana_mac>, <&kana_mac>;
+            mods = <(MOD_LSFT|MOD_RSFT)>;
+        };
+
+        kana_win_ns: kana_win_ns {
+            compatible = "zmk,behavior-mod-morph";
+            #binding-cells = <0>;
+            bindings = <&kana_win>, <&kana_win>;
+            mods = <(MOD_LSFT|MOD_RSFT)>;
+        };
+
+        lang1_ns: lang1_ns {
+            compatible = "zmk,behavior-mod-morph";
+            #binding-cells = <0>;
+            bindings = <&kp LANGUAGE_1>, <&kp LANGUAGE_1>;
+            mods = <(MOD_LSFT|MOD_RSFT)>;
+        };
+
         // Cancel on the first combo-key release; other keys must not force a hold.
         // A short combo is consumed without emitting text or changing layers.
         os_switch_hold: os_switch_hold {
@@ -196,7 +229,7 @@
 &kp Q           &kp W         &kp E             &kp R                  &kp T                                               &kp Y           &kp U  &kp I      &kp O            &kp P
 &kp A           &kp S         &kp D             &kp F                  &kp G                                               &kp H           &kp J  &kp K      &kp L            &kp SEMICOLON
 &kp Z           &kp X         &kp C             &kp V                  &kp B                                               &kp N           &kp M  &kp COMMA  &kp PERIOD       &kp SLASH
-&kp LEFT_SHIFT  &kp LEFT_ALT  &kp LEFT_COMMAND  &lt L_ARROW BACKSPACE  &kp LANGUAGE_2  &lt L_FUNC SPACE  &lt L_NUM TAB     &kana_mac                         &kp RIGHT_SHIFT  &kp RET
+&kp LEFT_SHIFT  &kp LEFT_ALT  &kp LEFT_COMMAND  &lt L_ARROW BACKSPACE  &kp LANGUAGE_2  &lt L_FUNC SPACE  &lt L_NUM TAB     &kana_mac_ns                      &kp RIGHT_SHIFT  &kp RET
             >;
 
             sensor-bindings = <&inc_dec_kp PG_UP PAGE_DOWN>;
@@ -207,7 +240,7 @@
 &kp Q      &kp W         &kp E             &kp R                  &kp T                                                     &kp Y           &kp U  &kp I      &kp O       &kp P
 &kp A      &kp S         &kp D             &kp F                  &kp G                                                     &kp H           &kp J  &kp K      &kp L       &kp SEMICOLON
 &kp Z      &kp X         &kp C             &kp V                  &kp B                                                     &kp N           &kp M  &kp COMMA  &kp PERIOD  &kp SLASH
-&kp LSHFT  &kp LEFT_ALT  &kp LEFT_CONTROL  &lt L_ARROW BACKSPACE  &kp INT_MUHENKAN  &lt L_FUNC SPACE  &lt L_WIN_NUM TAB     &kana_win                         &kp RSHIFT  &kp RET
+&kp LSHFT  &kp LEFT_ALT  &kp LEFT_CONTROL  &lt L_ARROW BACKSPACE  &kp INT_MUHENKAN  &lt L_FUNC SPACE  &lt L_WIN_NUM TAB     &kana_win_ns                      &kp RSHIFT  &kp RET
             >;
 
             sensor-bindings = <&inc_dec_kp PG_UP PAGE_DOWN>;

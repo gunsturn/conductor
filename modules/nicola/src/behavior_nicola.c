@@ -365,6 +365,14 @@ static bool nc_mods_active(void) {
     return mods != 0;
 }
 
+/* Conductor拡張: Shift 以外の修飾キー (Ctrl/Alt/GUI) が押されているか。
+ * 親指キーは Shift だけなら素通しせず親指シフトとして扱う (Shift+かな は macOS で
+ * カタカナ固定モードへの切替なので、Shift の離し遅れで偶発的に送らないため)。 */
+static bool nc_nonshift_mods_active(void) {
+    zmk_mod_flags_t mods = zmk_hid_get_explicit_mods();
+    return (mods & (zmk_mod_flags_t)~(MOD_LSFT | MOD_RSFT)) != 0;
+}
+
 /* ---- Conductor拡張: 親指キー処理の共通化 (&nc の親指キーと &ncl/&ncr の両方から呼ぶ) ---- */
 
 static void nc_thumb_pressed(bool left, int64_t ts) {
@@ -427,7 +435,10 @@ static void nc_solo_tap(int64_t ts, uint32_t tap_kc, uint32_t leave_layer) {
         }
     }
     nc_guard_ts = 0;
+    /* 単独タップ (かな/英数) は押されている Shift を剥がして送る (mod-morph と同じ方式) */
+    zmk_hid_masked_modifiers_set(MOD_LSFT | MOD_RSFT);
     nc_tap(tap_kc, ts);
+    zmk_hid_masked_modifiers_clear();
     if (leaves) {
         nc_pending_clear("leave layer");
         nc_emit("leave kana layer %u", leave_layer);
@@ -539,8 +550,9 @@ static int on_nicola_pressed(struct zmk_behavior_binding *binding,
     const uint32_t key = binding->param1;
     const int64_t ts = event.timestamp;
 
-    /* Ctrl/Alt/GUI/Shift 押下中はNICOLA処理せず素通し */
-    if (nc_mods_active()) {
+    /* Ctrl/Alt/GUI/Shift 押下中はNICOLA処理せず素通し (親指キーは Shift だけなら処理する) */
+    const bool thumb = key == nc_lthumb || key == nc_rthumb;
+    if (thumb ? nc_nonshift_mods_active() : nc_mods_active()) {
         nc_flush(ts); /* 未解決分を吐き出してから */
         if (nc_raw_n < NC_BUF_MAX) {
             nc_raw[nc_raw_n++] = key;
@@ -918,8 +930,8 @@ static int on_nicola_thumb_pressed(struct zmk_behavior_binding *binding,
                                    struct zmk_behavior_binding_event event) {
     const int64_t ts = event.timestamp;
 
-    /* 修飾キー押下中は単独タップ用のキーをそのまま素通し (&nc と同じ扱い) */
-    if (nc_mods_active()) {
+    /* Ctrl/Alt/GUI 押下中は単独タップ用のキーをそのまま素通し (Shift だけなら親指シフトとして処理) */
+    if (nc_nonshift_mods_active()) {
         nc_flush(ts);
         if (nc_raw_n < NC_BUF_MAX) {
             nc_raw[nc_raw_n++] = binding->param1;

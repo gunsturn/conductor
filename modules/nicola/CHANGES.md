@@ -32,3 +32,7 @@
 
 - `src/behavior_nicola.c`: 連続シフト中の親指の離し遅れ判定を追加。親指がこの押下ですでに文字をシフト済み（used）の状態で次の文字キーが押されたら即時確定せず保留（`nc_deferred`）し、その親指の解放時に文字押下からの重なりが `shift-release-ms` 以内なら離し遅れとみなして単独面で確定（文字自身の解放または次キー押下で確定）、超えていれば連続シフトとしてシフト面で確定する。文字自身の解放・次キー押下・他の親指押下で親指が押されたままなら従来どおりシフト面。「ょう」「きょう」「ゆう」などが「ゔ」になる問題への対策。
 - `dts/bindings/behaviors/zmk,behavior-nicola.yaml`: `shift-release-ms`（既定0=無効）を追加。keymap では 50。
+
+## 2026-10-12（3回目）
+
+- `src/behavior_nicola.c`: 親指キー（`&ncl`/`&ncr` と `&nc` の親指キー）は Shift だけが押されている場合は素通しせず親指シフトとして処理し、単独タップの送出時は `zmk_hid_masked_modifiers_set` で Shift を剥がす（mod-morph と同じ方式）。macOS の Shift+かな（カタカナ固定モード）を Shift の離し遅れで偶発的に送らないため。Ctrl/Alt/GUI 押下中の素通しは従来どおり。
