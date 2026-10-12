@@ -128,6 +128,7 @@ struct behavior_nicola_config {
     int32_t guard_repeat_ms; /* Conductor拡張: guard-repeat-ms */
     int32_t guard_timeout_ms; /* Conductor拡張: guard-timeout-ms */
     int32_t guard_bs_hold_ms; /* Conductor拡張: guard-bs-hold-ms */
+    int32_t shift_release_ms; /* Conductor拡張: shift-release-ms */
 };
 
 /* 連続シフト (DTの continuous-shift, 既定オフ)。オンの場合、親指キーを
@@ -165,6 +166,16 @@ static bool nc_l_used, nc_r_used;   /* この押下中に同時打鍵が成立�
  * 関与した親指は「シフトのつもりで押された」ものなので、離しても単独タップ
  * (Space/変換)を出さない。出すとIMEで変換が走り、ミス表示をさらに壊す */
 static bool nc_l_judged, nc_r_judged;
+
+/* ---- Conductor拡張: 連続シフト中の親指の離し遅れ ----
+ * 「ょ(右親指)+う」のように、シフトした文字の次に単独面の文字を打つとき、人の指は
+ * 親指を離すより先に次の文字キーを押しがちで、そのまま即時シフト確定すると「ゔ」になる。
+ * 親指がすでにこの押下で文字をシフト済み (used) の状態で次の文字が押されたら即時確定せず
+ * 保留し、文字押下から shift-release-ms 以内にその親指が離されたら「離し遅れ」とみなして
+ * 単独面で確定する。それより長く重なれば本当の連続シフトとして確定する。
+ * 文字キー自身の解放や次のキー押下で親指がまだ押されていればシフト面で確定する。 */
+static bool nc_deferred;                 /* 連続シフト中の文字を保留中 */
+static int32_t nc_shift_release_ms = 0; /* DT shift-release-ms (0=無効=即時確定) */
 
 /* ---- Conductor拡張: 未確定文字の推定ガード ----
  * かなを送出してから Enter/Esc (または英数キーの通過) を見るまでは、IME上に未確定文字が
@@ -289,6 +300,7 @@ static void nc_type_with(int64_t ts, bool lsh, bool rsh) {
         }
     }
     nc_chrcount = 0;
+    nc_deferred = false;
     nc_keycount = (nc_l_eff() ? 1 : 0) + (nc_r_eff() ? 1 : 0);
 }
 
@@ -345,6 +357,7 @@ static void nc_reset(void) {
     nc_l_judged = nc_r_judged = false;
     nc_raw_n = 0;
     nc_judge = 0;
+    nc_deferred = false;
 }
 
 static bool nc_mods_active(void) {
@@ -431,6 +444,18 @@ static void nc_thumb_released(bool left, int64_t ts, uint32_t tap_kc, uint32_t l
 
     nc_emit("%cthumb up (used=%d judged=%d pend=%d)%s", side, (int)*used, (int)*judged,
             nc_chrcount, tap ? " -> solo tap" : "");
+    if (nc_deferred && nc_chrcount > 0 && *held && *used) {
+        const int32_t ov = (int32_t)(ts - nc_last_chr_ts);
+        if (ov > nc_shift_release_ms) {
+            nc_emit("%cthumb up: overlap %dms > %dms -> continuous shift, commit shifted", side,
+                    ov, nc_shift_release_ms);
+            nc_type(ts); /* この親指はまだ held なのでシフト面で確定 */
+        } else {
+            nc_emit("%cthumb up: overlap %dms <= %dms -> late release, keep '%s' unshifted", side,
+                    ov, nc_shift_release_ms, nc_name(nc_buf[0]));
+            nc_deferred = false; /* 文字は保留のまま。自身の解放/次キーで単独面確定 */
+        }
+    }
     *held = false;
     *used = false;
     *judged = false;
@@ -549,14 +574,22 @@ static int on_nicola_pressed(struct zmk_behavior_binding *binding,
         nc_last_chr_ts = ts;
         nc_recount();
         if (nc_l_eff() || nc_r_eff()) { /* 親指先行/連続シフト: 有効な親指があれば即時シフト確定 */
-            nc_type(ts);
-            if (nc_l_held) {
-                nc_l_used = true;
+            const bool reused = nc_cont && nc_shift_release_ms > 0 &&
+                                ((nc_l_held && nc_l_used) || (nc_r_held && nc_r_used));
+            if (reused) { /* 連続シフト2文字目以降: 親指の離し遅れを見るため保留 */
+                nc_deferred = true;
+                nc_emit("dn '%s': thumb already used -> defer (release window %dms)",
+                        nc_name(key), nc_shift_release_ms);
+            } else {
+                nc_type(ts);
+                if (nc_l_held) {
+                    nc_l_used = true;
+                }
+                if (nc_r_held) {
+                    nc_r_used = true;
+                }
+                nc_recount();
             }
-            if (nc_r_held) {
-                nc_r_used = true;
-            }
-            nc_recount();
         }
         return ZMK_BEHAVIOR_OPAQUE;
     }
@@ -631,6 +664,7 @@ static int behavior_nicola_init(const struct device *dev) {
     nc_guard_repeat_ms = CLAMP(cfg->guard_repeat_ms, 100, 10000);
     nc_guard_timeout_ms = cfg->guard_timeout_ms <= 0 ? 0 : CLAMP(cfg->guard_timeout_ms, 500, 60000);
     nc_guard_bs_hold_ms = cfg->guard_bs_hold_ms <= 0 ? 0 : CLAMP(cfg->guard_bs_hold_ms, 100, 5000);
+    nc_shift_release_ms = cfg->shift_release_ms <= 0 ? 0 : CLAMP(cfg->shift_release_ms, 1, 500);
     nc_reset();
     return 0;
 }
@@ -853,6 +887,7 @@ static const struct behavior_driver_api behavior_nicola_driver_api = {
         .guard_repeat_ms = DT_INST_PROP(n, guard_repeat_ms),                                       \
         .guard_timeout_ms = DT_INST_PROP(n, guard_timeout_ms),                                     \
         .guard_bs_hold_ms = DT_INST_PROP(n, guard_bs_hold_ms),                                     \
+        .shift_release_ms = DT_INST_PROP(n, shift_release_ms),                                     \
     };                                                                                             \
     BEHAVIOR_DT_INST_DEFINE(n, behavior_nicola_init, NULL, NULL, &behavior_nicola_config_##n,      \
                             POST_KERNEL, CONFIG_KERNEL_INIT_PRIORITY_DEFAULT,                      \

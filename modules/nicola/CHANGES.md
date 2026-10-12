@@ -27,3 +27,8 @@
 
 - `src/behavior_nicola.c`: 未確定かな数の推定を追加。かな送出で `nc_pending_n` を +1、Backspace/Delete の押下で -1 し、0 になれば推定を解除する（Backspaceで全文を消した直後の英数が1回で通る）。Space/変換を見た後の最初の Backspace は変換取消として数えない。変換中に次のかなを送ると前の文節は確定したとみなして数え直す。修飾キー付きの Backspace/Delete と、`guard-bs-hold-ms` 以上押し続けた Backspace/Delete（OSのオートリピート）は全消しとみなして解除する。解除処理は `nc_pending_clear` に集約。
 - `dts/bindings/behaviors/zmk,behavior-nicola.yaml`: `guard-bs-hold-ms`（既定500、0で無効）を追加。
+
+## 2026-10-12（2回目）
+
+- `src/behavior_nicola.c`: 連続シフト中の親指の離し遅れ判定を追加。親指がこの押下ですでに文字をシフト済み（used）の状態で次の文字キーが押されたら即時確定せず保留（`nc_deferred`）し、その親指の解放時に文字押下からの重なりが `shift-release-ms` 以内なら離し遅れとみなして単独面で確定（文字自身の解放または次キー押下で確定）、超えていれば連続シフトとしてシフト面で確定する。文字自身の解放・次キー押下・他の親指押下で親指が押されたままなら従来どおりシフト面。「ょう」「きょう」「ゆう」などが「ゔ」になる問題への対策。
+- `dts/bindings/behaviors/zmk,behavior-nicola.yaml`: `shift-release-ms`（既定0=無効）を追加。keymap では 50。
